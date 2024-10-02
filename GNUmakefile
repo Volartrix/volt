@@ -29,7 +29,7 @@ run-hdd: run-hdd-$(KARCH)
 run-hdd-wsl: run-hdd-x86_64-wsl
 
 .PHONY: run-wsl
-run-hdd-wsl: run-x86_64-wsl
+run-wsl: run-x86_64-wsl
 
 .PHONY: run-x86_64
 run-x86_64: ovmf/ovmf-code-$(KARCH).fd ovmf/ovmf-vars-$(KARCH).fd $(IMAGE_NAME).iso
