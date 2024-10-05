@@ -70,9 +70,15 @@ void idt_init() {
 			   0xEE);
 
     idt_load((uint64_t)&idtPointer);
+
+	printf("Initialized IDT: \n\tLimit: 0x%.3llX\n\tBase: 0x%.16llX\n");
 }
 
 void IdtExcpHandler(Context_t frame) {
-	puts("Interrupt!");
-    asm("hlt");
+	if (frame.vector < 0x20) {
+		puts("INTERRUPT!\n");
+		puts(exceptionStrings[frame.vector]);
+		puts("\n");
+		asm ("hlt");
+	}
 }

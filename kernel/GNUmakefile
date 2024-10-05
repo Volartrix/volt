@@ -65,7 +65,8 @@ override KCFLAGS += \
     -fno-lto \
     -fno-PIC \
     -ffunction-sections \
-    -fdata-sections
+    -fdata-sections \
+    -D PRINTF_DISABLE_SUPPORT_FLOAT
 
 # Internal C preprocessor flags that should not be changed by the user.
 override KCPPFLAGS := \

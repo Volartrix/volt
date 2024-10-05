@@ -113,14 +113,14 @@ void kmain(void) {
         0
     );
 
+    ft_ctx->cursor_enabled = false;
+    ft_ctx->tab_size = 2;
     
     gdt_init();
-    puts("Initialized GDT\n");
 
     idt_init();
-    puts("Initialized IDT\n");
 
-    asm ("int $0x03");
+    asm ("int $0x3");
 
     hcf();
 }

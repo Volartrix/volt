@@ -2,6 +2,7 @@
 #define __GDT_H__
 
 #include <stdint.h>
+#include <stdio.h>
 
 typedef struct {
 	uint16_t limit;
