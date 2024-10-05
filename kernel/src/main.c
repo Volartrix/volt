@@ -4,6 +4,9 @@
 #include <limine.h>
 #include <flanterm/flanterm.h>
 #include <flanterm/backends/fb.h>
+#include <stdio.h>
+#include <hal/x64/gdt.h>
+#include <hal/x64/idt.h>
 
 struct flanterm_context *ft_ctx;
 
@@ -110,9 +113,14 @@ void kmain(void) {
         0
     );
 
-    const char test = 'A';
+    
+    gdt_init();
+    puts("Initialized GDT\n");
 
-    flanterm_write(ft_ctx, &test, sizeof(test));
+    idt_init();
+    puts("Initialized IDT\n");
+
+    asm ("int $0x03");
 
     hcf();
 }

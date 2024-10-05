@@ -1,9 +1,12 @@
 #ifndef __STDIO_H__
 #define __STDIO_H__
 
-extern struct flanterm_context *fb_ctx;
+#include "flanterm/flanterm.h"
+#include "flanterm/backends/fb.h"
+
+extern struct flanterm_context *ft_ctx;
 
 void putc(char c);
-void puts(char *str);
+void puts(const char *str);
 
 #endif // __STDIO_H__
