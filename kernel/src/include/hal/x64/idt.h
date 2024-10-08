@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+
 #define IDT_ENTRY_COUNT 256
 #define IRQ_BASE 0x20
 #define IRQ_COUNT 16
@@ -24,7 +25,7 @@ typedef struct {
 	uint64_t base;
 } __attribute__((packed)) idtPointer_t;
 
-typedef struct {
+typedef struct context {
 	uint64_t ds;
 	uint64_t cr2;
 	uint64_t cr3;

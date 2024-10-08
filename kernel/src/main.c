@@ -92,7 +92,9 @@ void kmain(void) {
 
     printf("Free memory: %d bytes\n", free_memory);
 
-    asm ("int $0x3");
+    asm ("int $0x80");
+
+    printf("Pls be returned!\n");
 
     hcf();
 }

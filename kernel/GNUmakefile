@@ -66,7 +66,10 @@ override KCFLAGS += \
     -fno-PIC \
     -ffunction-sections \
     -fdata-sections \
-    -D PRINTF_DISABLE_SUPPORT_FLOAT
+    -D PRINTF_DISABLE_SUPPORT_FLOAT \
+    -Wno-maybe-uninitialized \
+    -Wno-unused-parameter
+
 
 # Internal C preprocessor flags that should not be changed by the user.
 override KCPPFLAGS := \

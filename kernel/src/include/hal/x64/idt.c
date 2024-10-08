@@ -1,4 +1,5 @@
 #include "idt.h"
+#include "syscalls.h"
 
 idtEntry_t idtEntries[IDT_ENTRY_COUNT];
 idtPointer_t idtPointer;
@@ -76,9 +77,12 @@ void idt_init() {
 
 void IdtExcpHandler(Context_t frame) {
 	if (frame.vector < 0x20) {
-		puts("INTERRUPT!\n");
+		puts("Error bruh :skull:!\n");
 		puts(exceptionStrings[frame.vector]);
 		puts("\n");
 		asm ("hlt");
+	} else if (frame.vector == 0x80) {
+		handle_syscall(frame);
+		//asm("iretq");
 	}
 }

@@ -16,7 +16,7 @@ void _putchar(char character) {
 }
 
 void cls() {
-    ft_ctx->full_refresh(ft_ctx);
+  ft_ctx->full_refresh(ft_ctx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
