@@ -7,6 +7,10 @@ idt_load:
     sti
     ret
 
+global iretq_asm
+iretq_asm:
+	iretq
+
 %macro pushaq 0
     push rax
     push rbx

@@ -4,5 +4,4 @@
 void handle_syscall(Context_t ctx) {
 
     printf("Test syscalls\n");
-
 }
