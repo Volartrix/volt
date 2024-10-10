@@ -5,4 +5,4 @@
 
 char* uint32_to_bin(uint32_t num);
 
-#endif // __CONV_H__
+#endif    // __CONV_H__

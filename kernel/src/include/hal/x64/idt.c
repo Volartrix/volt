@@ -5,6 +5,23 @@ idtEntry_t      idtEntries[IDT_ENTRY_COUNT];
 idtPointer_t    idtPointer;
 extern uint64_t isrTable[];
 
+
+struct stackFrame {
+    struct stackFrame* rbp;
+    uint64_t           rip;
+};
+
+void stack_trace(uint64_t rbp, uint64_t rip) {
+    printf("\nStack Trace (Most recent call last): \n");
+    printf(" 0x%016llX\n", rip);
+    struct stackFrame* stack = (struct stackFrame*)rbp;
+    while (stack) {
+        printf(" 0x%016llX\n", stack->rip);
+        stack = stack->rbp;
+    }
+}
+
+
 extern void iretq_asm(void);
 
 irqHandler_t irqHandlers[IRQ_COUNT] = {0};
@@ -79,7 +96,7 @@ void idt_init() {
 
 void IdtExcpHandler(Context_t frame) {
     if (frame.vector < 0x20) {
-        char *rflags_string = rflags_str(frame.rflags);
+        char* rflags_string = rflags_str(frame.rflags);
         if (rflags_string == NULL) {
             printf("What the fuck?????");
             rflags_string = "Fucking";
@@ -93,18 +110,38 @@ void IdtExcpHandler(Context_t frame) {
         printf("+------+\n");
         printf("| REGS |\n");
         printf("+------+\n\n");
-        printf("RAX: 0x%.16llX, RBX: 0x%.16llX, RCX: 0x%.16llX, RDX: 0x%.16llX\n", frame.rax, frame.rbx, frame.rcx, frame.rdx);
-        printf("RSI: 0x%.16llX, RDI: 0x%.16llX, RBP: 0x%.16llX, RSP: 0x%.16llX\n", frame.rsi, frame.rdi, frame.rbp, frame.rsp);
-        printf("R8:  0x%.16llX, R9:  0x%.16llX, R10: 0x%.16llX, R11: 0x%.16llX\n", frame.r8 , frame.r9 , frame.r10, frame.r11);
-        printf("R12: 0x%.16llX, R13: 0x%.16llX, R14: 0x%.16llX, R15: 0x%.16llX\n", frame.r12, frame.r13, frame.r14, frame.r15);
-        printf("RIP: 0x%.16llX, RFL: 0x%.8llX [%s] %s\n", frame.rip, frame.rflags, rflags_string, get_rfl_other(frame.rflags, frame.cs));
+        printf(
+            "RAX: 0x%.16llX, RBX: 0x%.16llX, RCX: 0x%.16llX, RDX: 0x%.16llX\n",
+            frame.rax, frame.rbx, frame.rcx, frame.rdx);
+        printf(
+            "RSI: 0x%.16llX, RDI: 0x%.16llX, RBP: 0x%.16llX, RSP: 0x%.16llX\n",
+            frame.rsi, frame.rdi, frame.rbp, frame.rsp);
+        printf(
+            "R8:  0x%.16llX, R9:  0x%.16llX, R10: 0x%.16llX, R11: 0x%.16llX\n",
+            frame.r8, frame.r9, frame.r10, frame.r11);
+        printf(
+            "R12: 0x%.16llX, R13: 0x%.16llX, R14: 0x%.16llX, R15: 0x%.16llX\n",
+            frame.r12, frame.r13, frame.r14, frame.r15);
+        printf("RIP: 0x%.16llX, RFL: 0x%.8llX [%s] %s\n", frame.rip,
+               frame.rflags, rflags_string,
+               get_rfl_other(frame.rflags, frame.cs));
         printf(segment_str(frame.cs, frame.ss, frame.ds));
         printf(get_gdt_idt());
         printf(get_control_registers());
+        printf("\n\n+------------+\n");
+        printf("| STACKTRACE |\n");
+        printf("+------------+\n");
+        stack_trace(frame.rbp, frame.rip);
 
-        asm("hlt");
-    } else if (frame.vector == 0x80) {
-        handle_syscall(frame);
-        iretq_asm();
+        asm("cli");
+        for (;;) {
+            asm("hlt");
+        }
+
+    } else {
+        asm("cli");
+        for (;;) {
+            asm("hlt");
+        }
     }
 }

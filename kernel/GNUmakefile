@@ -15,7 +15,7 @@ $(call USER_VARIABLE,KCC,cc)
 
 $(call USER_VARIABLE,KLD,ld)
 
-$(call USER_VARIABLE,KCFLAGS,-g -O2 -pipe)
+$(call USER_VARIABLE,KCFLAGS,-g -pipe)
 
 $(call USER_VARIABLE,KCPPFLAGS,)
 
@@ -64,7 +64,7 @@ override KNASMFLAGS += \
 
 ifeq ($(KCC_IS_CLANG),1)
     override KCC += \
-        -target x86_64-unknown-none -fuse-ld=lld
+        -target x86_64-unknown-none
 endif
 override KCFLAGS += \
     -m64 \

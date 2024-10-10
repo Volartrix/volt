@@ -32,8 +32,9 @@ __attribute__((used,
                section(".requests"))) static volatile struct limine_hhdm_request
     hhdm_request = {.id = LIMINE_HHDM_REQUEST, .revision = 0};
 
-__attribute__((used,
-               section(".requests"))) static volatile struct limine_kernel_address_request
+__attribute__((
+    used,
+    section(".requests"))) static volatile struct limine_kernel_address_request
     kernel_addr_request = {.id = LIMINE_KERNEL_ADDRESS_REQUEST, .revision = 0};
 
 __attribute__((used,
@@ -45,12 +46,12 @@ __attribute__((
     section(
         ".requests_end_marker"))) static volatile LIMINE_REQUESTS_END_MARKER;
 
-uint64_t                       hhdm_offset = 0;
-uint64_t                       hddm_size = 0;
-struct limine_memmap_response* memmap      = NULL;
-struct limine_kernel_address_response* kernel_addr = NULL;
-uint64_t  kernel_phys_base = 0;
-uint64_t  kernel_virt_base = 0;
+uint64_t                               hhdm_offset      = 0;
+uint64_t                               hddm_size        = 0;
+struct limine_memmap_response*         memmap           = NULL;
+struct limine_kernel_address_response* kernel_addr      = NULL;
+uint64_t                               kernel_phys_base = 0;
+uint64_t                               kernel_virt_base = 0;
 
 
 static void hcf(void) {
@@ -59,7 +60,7 @@ static void hcf(void) {
     }
 }
 
-uint64_t *pml4_global = NULL;
+uint64_t* pml4_global = NULL;
 
 void kmain(void) {
     if (LIMINE_BASE_REVISION_SUPPORTED == false) {
@@ -82,9 +83,9 @@ void kmain(void) {
         framebuffer->blue_mask_shift, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, 0, 0, 1, 0, 0, 0);
 
-    hhdm_offset = hhdm_request.response->offset;
-    memmap      = memmap_request.response;
-    kernel_addr = kernel_addr_request.response;
+    hhdm_offset      = hhdm_request.response->offset;
+    memmap           = memmap_request.response;
+    kernel_addr      = kernel_addr_request.response;
     kernel_phys_base = kernel_addr->physical_base;
     kernel_virt_base = kernel_addr->virtual_base;
 
@@ -106,6 +107,8 @@ void kmain(void) {
     printf("Kernel Start: %.16llX\n", p_kernel_start);
     printf("Write Allowed Start: %.16llX\n", p_writeallowed_start);
     printf("Kernel End: %.16llX\n\n", p_kernel_end);
+
+    asm("int $0x3");
 
 
     hcf();

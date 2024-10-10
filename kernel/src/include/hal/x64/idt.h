@@ -4,9 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <util/regs.h>
 #include <util/bit.h>
 #include <util/conv.h>
+#include <util/regs.h>
 
 #define IDT_ENTRY_COUNT 256
 #define IRQ_BASE        0x20
