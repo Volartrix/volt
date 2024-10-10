@@ -89,7 +89,7 @@ void IdtExcpHandler(Context_t frame) {
         printf("# !!! A CPU EXCEPTION OCCURRED !!! #\n");
         printf("####################################\n");
         printf("Type: %s\n", exceptionStrings[frame.vector]);
-        printf("Error Code: 0x%.16llX\n\n", frame.err);
+        printf("Error Code: 0b%s\n\n", uint32_to_bin((uint32_t)frame.err));
         printf("+------+\n");
         printf("| REGS |\n");
         printf("+------+\n\n");
