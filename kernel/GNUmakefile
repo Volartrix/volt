@@ -101,43 +101,43 @@ all: bin-$(KARCH)/$(OUTPUT)
 bin-$(KARCH)/$(OUTPUT): GNUmakefile linker-$(KARCH).ld $(OBJ)
 	mkdir -p "$$(dirname $@)"
 	$(KLD) $(OBJ) $(KLDFLAGS) -o $@
-	echo "Linked $(OUTPUT)"
+	echo "\033[31m\033[1m[LINKING]\033[0m $(OUTPUT)"
 
 -include $(HEADER_DEPS)
 
 obj-$(KARCH)/%.c.o: src/%.c GNUmakefile
 	mkdir -p "$$(dirname $@)"
 	$(KCC) $(KCFLAGS) $(KCPPFLAGS) -c $< -o $@
-	echo "Compiling $< into $@"
+	echo "\033[32m\033[1m[COMPILING]\033[0m $< -> $@"
 
 obj-$(KARCH)/%.S.o: src/%.S GNUmakefile
 	mkdir -p "$$(dirname $@)"
 	$(KCC) $(KCFLAGS) $(KCPPFLAGS) -c $< -o $@
-	echo "Compiling $< into $@"
+	echo "\033[32m\033[1m[COMPILING]\033[0m $< -> $@"
 
 obj-$(KARCH)/%.asm.o: src/%.asm GNUmakefile
 	mkdir -p "$$(dirname $@)"
 	nasm $(KNASMFLAGS) $< -o $@
-	echo "Assembling $< into $@"
+	echo "\033[38;2;0;100;0m\033[1m[ASSEMBLING]\033[0m $< -> $@"
 
 .PHONY: clean
 clean:
 	rm -rf bin-$(KARCH) obj-$(KARCH)
-	echo "Cleaned kernel directory"
+	echo "\033[34m\033[1m[INFO]\033[0m\033[0m cleaned kernel"
 
 .PHONY: distclean
 distclean:
 	rm -rf bin-* obj-* freestnd-c-hdrs-0bsd src/cc-runtime.c src/limine.h
-	echo "Distcleaned kernel directory"
+	echo "\033[34m\033[1m[INFO]\033[0m\033[0m distcleaned kernel"
 
 .PHONY: install
 install: all
 	install -d "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
 	install -m 644 bin-$(KARCH)/$(OUTPUT) "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/$(OUTPUT)-$(KARCH)"
-	echo "Installed"
+	echo "\033[34m\033[1m[INFO]\033[0m\033[0m Installed"
 
 .PHONY: uninstall
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)/$(OUTPUT)-$(KARCH)"
 	-rmdir "$(DESTDIR)$(PREFIX)/share/$(OUTPUT)"
-	echo "Uninstalled"
+	echo "\033[34m\033[1m[INFO]\033[0m\033[0m Uninstalled"
