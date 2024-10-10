@@ -79,15 +79,28 @@ void idt_init() {
 
 void IdtExcpHandler(Context_t frame) {
     if (frame.vector < 0x20) {
+        char *rflags_string = rflags_str(frame.rflags);
+        if (rflags_string == NULL) {
+            printf("What the fuck?????");
+            rflags_string = "Fucking";
+        }
         cls();
-        printf("#################################################\n");
-        printf("# !!! A CPU EXCEPTION INTERRUPTED EXECUTION !!! #\n");
-        printf("#################################################\n");
+        printf("####################################\n");
+        printf("# !!! A CPU EXCEPTION OCCURRED !!! #\n");
+        printf("####################################\n");
         printf("Type: %s\n", exceptionStrings[frame.vector]);
-        printf("Error Code: %.16llX\n\n", frame.err);
-        printf("# REGS #\n\n");
-        printf("RAX: %.16llX\n", frame.rax);
-        printf("RIP: %.16llX\n", frame.rip);
+        printf("Error Code: 0x%.16llX\n\n", frame.err);
+        printf("+------+\n");
+        printf("| REGS |\n");
+        printf("+------+\n\n");
+        printf("RAX: 0x%.16llX, RBX: 0x%.16llX, RCX: 0x%.16llX, RDX: 0x%.16llX\n", frame.rax, frame.rbx, frame.rcx, frame.rdx);
+        printf("RSI: 0x%.16llX, RDI: 0x%.16llX, RBP: 0x%.16llX, RSP: 0x%.16llX\n", frame.rsi, frame.rdi, frame.rbp, frame.rsp);
+        printf("R8:  0x%.16llX, R9:  0x%.16llX, R10: 0x%.16llX, R11: 0x%.16llX\n", frame.r8 , frame.r9 , frame.r10, frame.r11);
+        printf("R12: 0x%.16llX, R13: 0x%.16llX, R14: 0x%.16llX, R15: 0x%.16llX\n", frame.r12, frame.r13, frame.r14, frame.r15);
+        printf("RIP: 0x%.16llX, RFL: 0x%.8llX [%s] %s\n", frame.rip, frame.rflags, rflags_string, get_rfl_other(frame.rflags, frame.cs));
+        printf(segment_str(frame.cs, frame.ss, frame.ds));
+        printf(get_gdt_idt());
+        printf(get_control_registers());
 
         asm("hlt");
     } else if (frame.vector == 0x80) {
