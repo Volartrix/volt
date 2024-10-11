@@ -96,9 +96,6 @@ void kmain(void) {
     idt_init();
 
     pmm_init();
-    init_vmm();
-
-    pml4_global = init_paging_task();
 
     uint64_t free_memory = pmm_get_free();
 
@@ -109,7 +106,6 @@ void kmain(void) {
     printf("Kernel End: %.16llX\n\n", p_kernel_end);
 
     asm("int $0x3");
-
 
     hcf();
 }

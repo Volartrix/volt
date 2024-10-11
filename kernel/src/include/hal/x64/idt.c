@@ -12,7 +12,7 @@ struct stackFrame {
 };
 
 void stack_trace(uint64_t rbp, uint64_t rip) {
-    printf("\nStack Trace (Most recent call last): \n");
+    printf("\nMost recent call last: \n");
     printf(" 0x%016llX\n", rip);
     struct stackFrame* stack = (struct stackFrame*)rbp;
     while (stack) {
@@ -133,15 +133,32 @@ void IdtExcpHandler(Context_t frame) {
         printf("+------------+\n");
         stack_trace(frame.rbp, frame.rip);
 
-        asm("cli");
-        for (;;) {
-            asm("hlt");
-        }
+        printf("\n\n+-------------------------+\n");
+        printf("| PRESS ESC KEY TO REBOOT |\n");
+        printf("+-------------------------+\n");
+
+        char c = 0;
+
+        do {
+
+            if (inb(0x60) != c)    // PORT FROM WHICH WE READ
+            {
+                c = inb(0x60);
+                if (c > 0) {
+
+                    printf(".");
+                }
+            }
+
+
+        } while (c != 1);    // 1= ESCAPE
+
+        uint8_t good = 0x02;
+        while (good & 0x02) good = inb(0x64);
+        outb(0x64, 0xFE);
+        asm("hlt");
 
     } else {
-        asm("cli");
-        for (;;) {
-            asm("hlt");
-        }
+        asm("iretq");
     }
 }
