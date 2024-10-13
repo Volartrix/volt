@@ -91,7 +91,8 @@ void idt_init() {
 
     idt_load((uint64_t)&idtPointer);
 
-    printf("Initialized IDT: \n\tLimit: 0x%.3llX\n\tBase: 0x%.16llX\n", idtPointer.limit, idtPointer.base);
+    printf("Initialized IDT: \n\tLimit: 0x%.3llX\n\tBase: 0x%.16llX\n",
+           idtPointer.limit, idtPointer.base);
 }
 
 void IdtExcpHandler(Context_t frame) {

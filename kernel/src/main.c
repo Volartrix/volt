@@ -96,16 +96,20 @@ void kmain(void) {
     idt_init();
 
     pmm_init();
-    uint64_t cr3 = init_vmm();
+    uint64_t* pml4 = NULL;
+    uint64_t  cr3  = init_vmm(pml4);
 
     KERNEL_SWITCH_PAGE_TREE(cr3);
     KERNEL_SWITCH_STACK();
 
+    printf("Switched Page Tree and Switched the Kernel Stack!\n\n");
     printf("Kernel Start: %.16llX\n", p_kernel_start);
     printf("Write Allowed Start: %.16llX\n", p_writeallowed_start);
     printf("Kernel End: %.16llX\n\n", p_kernel_end);
 
-    //asm("int $0x3");
+    printf("PML4 from vmm_init(): %p", pml4);
+
+    // asm("int $0x3");
 
     hcf();
 }

@@ -103,7 +103,7 @@ uint64_t virt_to_phys(uint64_t pml4_addr[], uint64_t virt_addr) {
 }
 
 uint64_t phys_to_virt(uint64_t phys_addr) {
-    return phys_addr + hhdm_offset;
+    return phys_addr + TOPBITS;
 }
 
 void write_vmem(uint64_t* pml4_addr, uint64_t virt_addr, char* data,
@@ -264,12 +264,16 @@ uint64_t* init_paging_task() {
     return (uint64_t*)pml4_virt;
 }
 
-uint64_t init_vmm() {
+uint64_t init_vmm(uint64_t pml4[]) {
     uint64_t pml4_virt = ((uint64_t)pmm_req_pages(1)) + hhdm_offset;
     ku_memset((uint8_t*)pml4_virt, 0, 4096);
     map_all((uint64_t*)pml4_virt);
     uint64_t cr3 = pml4_virt - hhdm_offset;
-    
-    printf("Successfully initialized VMM!\n");
+
+    pml4 = (uint64_t*)pml4_virt;
+
+    printf("Successfully initialized VMM: \n\tPML4 Virtual: %.16llX\n\tPML4 "
+           "Physical: %.16llX \n\n",
+           pml4_virt, cr3);
     return cr3;
 }

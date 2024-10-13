@@ -2,6 +2,7 @@
 #define __PMM_H__
 
 #include <limine.h>
+#include <mm/vmm.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -9,6 +10,7 @@
 
 extern struct limine_memmap_response* memmap;
 extern uint64_t                       hhdm_offset;
+extern uint64_t*                      pml4_global;
 
 void     pmm_init();
 void*    pmm_req_pages(size_t num_pages);

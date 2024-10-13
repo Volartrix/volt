@@ -65,7 +65,7 @@ void pmm_init() {
 
     printf("Successfully initialized PMM: \n\tTop Address: 0x%.16llX "
            "\n\tHigher Address: 0x%.16llX \n\tBitmap Address: %p \n\tBitmap "
-           "Pages: 0x%.16llX \n\tBitmap Size: %.16llX\n",
+           "Pages: 0x%.16llX \n\tBitmap Size: %.16llX\n\n",
            top_address, higher_address, bitmap, bitmap_pages, bitmap_size);
 }
 

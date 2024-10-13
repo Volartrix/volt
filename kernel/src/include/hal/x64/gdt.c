@@ -15,7 +15,8 @@ void gdt_init() {
     gdtPointer.base  = (uintptr_t)&gdtEntries;
 
     gdt_flush(gdtPointer);
-    printf("Initialized GDT: \n\tLimit: 0x%.3llX \n\tBase: 0x%.16llX\n", gdtPointer.limit, gdtPointer.base);
+    printf("Initialized GDT: \n\tLimit: 0x%.3llX \n\tBase: 0x%.16llX\n",
+           gdtPointer.limit, gdtPointer.base);
 }
 
 void gdt_flush(gdtPointer_t gdtr) {

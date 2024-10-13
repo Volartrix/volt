@@ -190,6 +190,11 @@ clean:
 	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd bin > /dev/null 2>&1
 	echo "\033[34m\033[1m[INFO]\033[0m cleaned root"
 
+.PHONY: format
+format:
+	find . -name "*.h" -o -name "*.c" | xargs clang-format -i --style=file
+	echo "\033[34m\033[1m[INFO]\033[0m formatted code using clang format"
+
 .PHONY: distclean
 distclean: clean
 	$(MAKE) -C kernel distclean
