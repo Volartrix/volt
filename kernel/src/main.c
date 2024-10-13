@@ -96,16 +96,16 @@ void kmain(void) {
     idt_init();
 
     pmm_init();
+    uint64_t cr3 = init_vmm();
 
-    uint64_t free_memory = pmm_get_free();
-
-    printf("Free memory: %dMB bytes\n\n", free_memory / 1024 / 1024);
+    KERNEL_SWITCH_PAGE_TREE(cr3);
+    KERNEL_SWITCH_STACK();
 
     printf("Kernel Start: %.16llX\n", p_kernel_start);
     printf("Write Allowed Start: %.16llX\n", p_writeallowed_start);
     printf("Kernel End: %.16llX\n\n", p_kernel_end);
 
-    asm("int $0x3");
+    //asm("int $0x3");
 
     hcf();
 }

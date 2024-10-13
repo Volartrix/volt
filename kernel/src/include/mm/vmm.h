@@ -48,7 +48,7 @@ extern uint64_t* pml4_global;
                      :                  \
                      : "r"(KERNEL_STACK_PTR))
 
-void      init_vmm();
+uint64_t      init_vmm();
 uint64_t* init_paging_task();
 uint64_t  virt_to_phys(uint64_t pml4[], uint64_t virt_addr);
 uint64_t  phys_to_virt(uint64_t phys_addr);

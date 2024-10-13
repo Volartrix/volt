@@ -93,7 +93,7 @@ char* get_control_registers() {
 
     // Format the result string
     snprintf(result, sizeof(result),
-             "CR0 = 0x%.8lX CR2 = 0x%.8lX CR3 = 0x%.8lX CR4 = 0x%.8lX", cr0,
+             "CR0 = 0x%.16lX CR2 = 0x%.16lX CR3 = 0x%.16lX CR4 = 0x%.16lX", cr0,
              cr2, cr3, cr4);
 
     return result;

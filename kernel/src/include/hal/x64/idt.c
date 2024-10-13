@@ -91,7 +91,7 @@ void idt_init() {
 
     idt_load((uint64_t)&idtPointer);
 
-    printf("Initialized IDT: \n\tLimit: 0x%.3llX\n\tBase: 0x%.16llX\n");
+    printf("Initialized IDT: \n\tLimit: 0x%.3llX\n\tBase: 0x%.16llX\n", idtPointer.limit, idtPointer.base);
 }
 
 void IdtExcpHandler(Context_t frame) {
@@ -106,7 +106,7 @@ void IdtExcpHandler(Context_t frame) {
         printf("# !!! A CPU EXCEPTION OCCURRED !!! #\n");
         printf("####################################\n");
         printf("Type: %s\n", exceptionStrings[frame.vector]);
-        printf("Error Code: 0b%s\n\n", uint32_to_bin((uint32_t)frame.err));
+        printf("Error Code: 0x%.16llX\n\n", frame.err);
         printf("+------+\n");
         printf("| REGS |\n");
         printf("+------+\n\n");

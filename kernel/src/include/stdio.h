@@ -7,6 +7,7 @@
 #include <mm/pmm.h>
 #include <stdarg.h>
 #include <string.h>
+#include <hal/x64/io.h>
 
 extern struct flanterm_context* ft_ctx;
 

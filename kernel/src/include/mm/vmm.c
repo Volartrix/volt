@@ -264,10 +264,12 @@ uint64_t* init_paging_task() {
     return (uint64_t*)pml4_virt;
 }
 
-void init_vmm() {
+uint64_t init_vmm() {
     uint64_t pml4_virt = ((uint64_t)pmm_req_pages(1)) + hhdm_offset;
     ku_memset((uint8_t*)pml4_virt, 0, 4096);
     map_all((uint64_t*)pml4_virt);
     uint64_t cr3 = pml4_virt - hhdm_offset;
+    
     printf("Successfully initialized VMM!\n");
+    return cr3;
 }
