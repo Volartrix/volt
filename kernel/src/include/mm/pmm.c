@@ -1,135 +1,166 @@
 #include "pmm.h"
 
-#define DIV_ROUND_UP(x, y) (x + (y - 1)) / y
-#define ALIGN_UP(x, y)     DIV_ROUND_UP(x, y) * y
-#define ALIGN_DOWN(x, y)   (x / y) * y
-
 #define PAGE_SIZE 4096
 
-uint8_t* bitmap;
-uint64_t bitmap_pages;
-uint64_t bitmap_size;
-
-void bitmap_set(uint8_t* bitmap, uint64_t bit) {
-    bitmap[bit / 8] |= 1 << (bit % 8);
-}
-
-void bitmap_clear(uint8_t* bitmap, uint64_t bit) {
-    bitmap[bit / 8] &= ~(1 << (bit % 8));
-}
-
-uint8_t bitmap_get(uint8_t* bitmap, uint64_t bit) {
-    return bitmap[bit / 8] & (1 << (bit % 8));
-}
+// First node
+struct fl_entry* head = NULL;
+// Last usable node
+struct fl_entry* last = NULL;
 
 void pmm_init() {
-    uint64_t top_address;
-    uint64_t higher_address = 0;
-
-    for (uint64_t entryCount = 0; entryCount < memmap->entry_count;
-         entryCount++) {
-        struct limine_memmap_entry* entry = memmap->entries[entryCount];
-        if (entry->type == LIMINE_MEMMAP_USABLE) {
-            top_address = entry->base + entry->length;
-            if (top_address > higher_address) higher_address = top_address;
-        }
-    }
-    bitmap_pages = higher_address / PAGE_SIZE;
-    bitmap_size  = ALIGN_UP(bitmap_pages / 8, PAGE_SIZE);
-
-    for (uint64_t entryCount = 0; entryCount < memmap->entry_count;
-         entryCount++) {
-        struct limine_memmap_entry* entry = memmap->entries[entryCount];
-
-        if (entry->type == LIMINE_MEMMAP_USABLE) {
-            if (entry->length >= bitmap_size) {
-                bitmap = (uint8_t*)(entry->base + hhdm_offset);
-                memset(bitmap, 0xFF, bitmap_size);
-                entry->base   += bitmap_size;
-                entry->length -= bitmap_size;
-                break;
-            }
+    // Get the first usable entry as the head of the node
+    for (size_t i = 0; i < memmap->entry_count; i++) {
+        if (memmap->entries[i]->type == LIMINE_MEMMAP_USABLE) {
+            struct fl_entry* first_usable =
+                (struct fl_entry*)((uintptr_t)memmap->entries[i]->base
+                                   + hhdm_offset);
+            first_usable->next = NULL;
+            head               = first_usable;
+            last               = first_usable;
+            break;    // Exit after the first usable entry
         }
     }
 
-    for (uint64_t entryCount = 0; entryCount < memmap->entry_count;
-         entryCount++) {
-        struct limine_memmap_entry* entry = memmap->entries[entryCount];
+    // Add all other usable entries to the list
+    for (size_t i = 0; i < memmap->entry_count; i++) {
+        if (memmap->entries[i]->type == LIMINE_MEMMAP_USABLE
+            && (uintptr_t)(memmap->entries[i]->base + hhdm_offset)
+                   != (uintptr_t)(head)) {
 
-        if (entry->type == LIMINE_MEMMAP_USABLE) {
-            for (uint64_t i = 0; i < entry->length; i += PAGE_SIZE) {
-                bitmap_clear(bitmap, (entry->base + i) / PAGE_SIZE);
-            }
+            struct fl_entry* new_entry =
+                (struct fl_entry*)((uintptr_t)memmap->entries[i]->base
+                                   + hhdm_offset);
+            new_entry->next = NULL;
+            last->next      = new_entry;
+            last            = new_entry;
         }
     }
 
-    printf("Successfully initialized PMM: \n\tTop Address: 0x%.16llX "
-           "\n\tHigher Address: 0x%.16llX \n\tBitmap Address: %p \n\tBitmap "
-           "Pages: 0x%.16llX \n\tBitmap Size: %.16llX\n\n",
-           top_address, higher_address, bitmap, bitmap_pages, bitmap_size);
+    // Terminate the free list after the last usable entry
+    if (last) {
+        last->next = NULL;
+    }
+
+    size_t usable_entries = (size_t)({
+        size_t count = 0;
+        for (size_t i = 0; i < memmap->entry_count; i++)
+            count += (memmap->entries[i]->type == LIMINE_MEMMAP_USABLE) ? 1 : 0;
+        count;
+    });
+
+    printf("Initialized PMM: \n\tUsable Enties: %d\n\tHead Address: "
+           "%.16llX\n\tLast Address: %.16llX\n",
+           usable_entries, (uint64_t)(uintptr_t)head),
+        (uint64_t)(uintptr_t)last;
 }
 
 void* pmm_req_pages(size_t num_pages) {
-    uint64_t last_allocated_index = 0;
+    if (num_pages == 0) return NULL;              // 0 pages is invalid
 
-    while (1) {
-        if (!bitmap_get(bitmap, last_allocated_index)) {
-            size_t consecutive_free_pages = 1;
+    size_t total_size = num_pages * PAGE_SIZE;    // Total size to allocate
+    struct fl_entry* current = head;              // Start from the head
+    struct fl_entry* prev    = NULL;              // Track previous entry
 
-            for (size_t i = 1; i < num_pages; i++) {
-                if (!bitmap_get(bitmap, last_allocated_index + 1)) {
-                    ++consecutive_free_pages;
-                } else {
-                    consecutive_free_pages = 0;
-                    break;
-                }
+    while (current) {
+        if (PAGE_SIZE >= total_size) {
+            if (prev) {
+                prev->next = current->next;
+            } else {
+                head = current->next;
             }
-
-            if (consecutive_free_pages == num_pages) {
-                for (size_t i = 0; i < num_pages; i++) {
-                    bitmap_set(bitmap, last_allocated_index + i);
-                }
-
-                return (void*)(last_allocated_index * PAGE_SIZE);
-            }
+            current->next = NULL;
+            return (void*)current;
         }
 
-        ++last_allocated_index;
-
-        if (last_allocated_index >= bitmap_pages) {
-            return NULL;
-        }
+        prev    = current;
+        current = current->next;
     }
+
+    printf("Out of memory! Unable to allocate %zu pages!\n", num_pages);
+    return NULL;
 }
 
 void pmm_free_pages(void* ptr, size_t num_pages) {
-    if (ptr == NULL) {
-        printf("ptr is null you dumbass");
-        asm("hlt");
-    }
-    if ((uint64_t)ptr % PAGE_SIZE != 0) {
-        printf("ptr isn't devidable through the page size you dumbass");
-        asm("hlt");
-    }
-    if (num_pages <= 0) {
-        printf("The number of pages is 0 you dumbass");
-        asm("hlt");
-    }
+    if (ptr == NULL || num_pages == 0 || num_pages * PAGE_SIZE != PAGE_SIZE)
+        return;
 
-    uint64_t start_bit_idx = ((uint64_t)ptr / PAGE_SIZE);
+    struct fl_entry* free_block = (struct fl_entry*)ptr;
+    free_block->next            = NULL;
 
-    for (size_t i = start_bit_idx; i < num_pages; ++i) {
-        bitmap_clear(bitmap, i);
+    if (!head) {
+        head = free_block;
+        last = free_block;
+    } else {
+        struct fl_entry* current = head;
+        struct fl_entry* prev    = NULL;
+
+        while (current && (uintptr_t)current < (uintptr_t)free_block) {
+            prev    = current;
+            current = current->next;
+        }
+
+        if (prev) {
+            prev->next = free_block;
+        } else {
+            head = free_block;
+        }
+        free_block->next = current;
+
+        if (!current) {
+            last = free_block;    // If it's the last block, update 'last'
+        }
     }
 }
 
 uint64_t pmm_get_free() {
-    uint64_t freeMemory = 0;
-    for (uint64_t i = 0; i < bitmap_pages; i++) {
-        if (!bitmap_get(bitmap, i)) {
-            freeMemory += PAGE_SIZE;
+    uint64_t         total_free = 0;
+    struct fl_entry* current    = head;
+
+    while (current) {
+        total_free += PAGE_SIZE;
+        current     = current->next;
+    }
+
+    return total_free;
+}
+
+void pmm_stress_test() {
+    void*  allocations[ALLOCATIONS];
+    size_t num_pages[ALLOCATIONS];
+    size_t allocation_count = 0;
+
+    for (size_t i = 0; i < ALLOCATIONS; i++) {
+        size_t pages_to_allocate =
+            (i % MAX_PAGES) + 1;    // Allocate pages in a round-robin fashion
+        void* memory = pmm_req_pages(pages_to_allocate);
+
+        if (memory) {
+            allocations[allocation_count] = memory;
+            num_pages[allocation_count]   = pages_to_allocate;
+            allocation_count++;
+            printf("Allocated %zu pages at %p\n", pages_to_allocate, memory);
+        } else {
+            printf("Failed to allocate %zu pages\n", pages_to_allocate);
+        }
+
+        if (allocation_count > 0
+            && (i % 3 == 0)) {    // Free every third allocation
+            size_t index = (i % allocation_count);
+            pmm_free_pages(allocations[index], num_pages[index]);
+            printf("Freed %zu pages at %p\n", num_pages[index],
+                   allocations[index]);
+            allocations[index] =
+                allocations[allocation_count
+                            - 1];    // Move last to freed index
+            num_pages[index] = num_pages[allocation_count - 1];
+            allocation_count--;
         }
     }
 
-    return freeMemory;
+    // Free any remaining allocations at the end
+    for (size_t i = 0; i < allocation_count; i++) {
+        pmm_free_pages(allocations[i], num_pages[i]);
+        printf("Freed remaining %zu pages at %p\n", num_pages[i],
+               allocations[i]);
+    }
 }

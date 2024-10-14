@@ -13,7 +13,7 @@ Volt is an x86_64 based monolithic Operating System Kernel Based on the limine b
 ## What are Volt's features?
 The kernel has a few important features that it needs to use to manage memory for example. Below is a list of features the kernel uses.
 
-* **PMM**: A bitmap physical memory manager is used handle physical memory allocation
+* **PMM**: A free list based physical memory manager is used handle physical memory allocation
 * **VMM**: A virtual memory manager is used to manage but not allocate virtual memory with paging. It is a bit broken right now
 
 ## How to use Volt
