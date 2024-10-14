@@ -47,7 +47,8 @@ override KCFLAGS += \
     -fdata-sections \
     -D PRINTF_DISABLE_SUPPORT_FLOAT \
     -Wno-maybe-uninitialized \
-    -Wno-unused-parameter
+    -Wno-unused-parameter \
+    -Wno-unused-but-set-parameter
 
 
 # Internal C preprocessor flags that should not be changed by the user.

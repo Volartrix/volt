@@ -1,6 +1,8 @@
 # Volt
 An operating system designed for the x86 architecture
 
+![Logo](images/volt2.png)
+
 ![GitHub last commit](https://img.shields.io/github/last-commit/volartrix/volt?style=for-the-badge&logo=git)
 ![GitHub Issues ](https://img.shields.io/github/issues/volartrix/volt?style=for-the-badge&logo=github)
 ![GitHub License](https://img.shields.io/github/license/volartrix/volt?style=for-the-badge&logo=apache)
@@ -43,6 +45,15 @@ Here are some deserved Credits:
 * **Unmapped Stack**: @.jakedoesstuff on Discord - Helping me with paging and other things
 * **Kevin Alavik**: @kevinalavik on Discord - Helping me with the PMM and other parts
 * **OSDev Wiki**: https://wiki.osdev.org - One of the most important parts of OSDev
+* **Nekoflare**: @nekoflare on Discord - Making the PMM simpler
+
+## Screenshots
+### The build process
+![Building](images/screenshots/building.png)
+### Running the kernel in QEMU
+![Running](images/screenshots/running.png)
+### The panic screen
+![Panic](images/screenshots/panic.png)
 
 ## Other Info
 ### Inspiration

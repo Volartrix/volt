@@ -138,7 +138,7 @@ void map_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t phys_addr,
     for (; pml4 < 512; pml4++) {
         uint64_t* pml3_addr = NULL;
         if (pml4_addr[pml4] == 0) {
-            pml4_addr[pml4] = (uint64_t)pmm_req_pages(1);
+            pml4_addr[pml4] = (uint64_t)pmm_req_page(1);
             pml3_addr       = (uint64_t*)(pml4_addr[pml4] + hhdm_offset);
             ku_memset((uint8_t*)pml3_addr, 0, 4096);
             pml4_addr[pml4] |= flags | KERNEL_PFLAG_PRESENT | KERNEL_PFLAG_WRITE
@@ -151,7 +151,7 @@ void map_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t phys_addr,
         for (; pml3 < 512; pml3++) {
             uint64_t* pml2_addr = NULL;
             if (pml3_addr[pml3] == 0) {
-                pml3_addr[pml3] = (uint64_t)pmm_req_pages(1);
+                pml3_addr[pml3] = (uint64_t)pmm_req_page(1);
                 pml2_addr       = (uint64_t*)(pml3_addr[pml3] + hhdm_offset);
                 ku_memset((uint8_t*)pml2_addr, 0, 4096);
                 pml3_addr[pml3] |= flags | KERNEL_PFLAG_PRESENT
@@ -164,7 +164,7 @@ void map_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t phys_addr,
             for (; pml2 < 512; pml2++) {
                 uint64_t* pml1_addr = NULL;
                 if (pml2_addr[pml2] == 0) {
-                    pml2_addr[pml2] = (uint64_t)pmm_req_pages(1);
+                    pml2_addr[pml2] = (uint64_t)pmm_req_page(1);
                     pml1_addr = (uint64_t*)(pml2_addr[pml2] + hhdm_offset);
                     ku_memset((uint8_t*)pml1_addr, 0, 4096);
                     pml2_addr[pml2] |= flags | KERNEL_PFLAG_PRESENT
@@ -200,7 +200,7 @@ void alloc_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t num_pages,
     for (; pml4 < 512; pml4++) {
         uint64_t* pml3_addr = NULL;
         if (pml4_addr[pml4] == 0) {
-            pml4_addr[pml4] = (uint64_t)pmm_req_pages(1);
+            pml4_addr[pml4] = (uint64_t)pmm_req_page(1);
             pml3_addr       = (uint64_t*)(pml4_addr[pml4] + hhdm_offset);
             ku_memset((uint8_t*)pml3_addr, 0, 4096);
             pml4_addr[pml4] |= flags | KERNEL_PFLAG_PRESENT | KERNEL_PFLAG_WRITE
@@ -212,7 +212,7 @@ void alloc_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t num_pages,
         for (; pml3 < 512; pml3++) {
             uint64_t* pml2_addr = NULL;
             if (pml3_addr[pml3] == 0) {
-                pml3_addr[pml3] = (uint64_t)pmm_req_pages(1);
+                pml3_addr[pml3] = (uint64_t)pmm_req_page(1);
                 pml2_addr       = (uint64_t*)(pml3_addr[pml3] + hhdm_offset);
                 ku_memset((uint8_t*)pml2_addr, 0, 4096);
                 pml3_addr[pml3] |= flags | KERNEL_PFLAG_PRESENT
@@ -225,7 +225,7 @@ void alloc_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t num_pages,
             for (; pml2 < 512; pml2++) {
                 uint64_t* pml1_addr = NULL;
                 if (pml2_addr[pml2] == 0) {
-                    pml2_addr[pml2] = (uint64_t)pmm_req_pages(1);
+                    pml2_addr[pml2] = (uint64_t)pmm_req_page(1);
                     pml1_addr = (uint64_t*)(pml2_addr[pml2] + hhdm_offset);
                     ku_memset((uint8_t*)pml1_addr, 0, 4096);
                     pml2_addr[pml2] |= flags | KERNEL_PFLAG_PRESENT
@@ -236,7 +236,7 @@ void alloc_pages(uint64_t pml4_addr[], uint64_t virt_addr, uint64_t num_pages,
                 }
 
                 for (; pml1 < 512; pml1++) {
-                    uint64_t phys = (uint64_t)pmm_req_pages(1);
+                    uint64_t phys = (uint64_t)pmm_req_page(1);
                     ku_memset((uint8_t*)(phys + hhdm_offset), 0, PAGE_SIZE);
                     pml1_addr[pml1] = phys | flags;
                     num_pages--;
@@ -258,14 +258,14 @@ void clear_page_cache(uint64_t addr) {
 }
 
 uint64_t* init_paging_task() {
-    uint64_t pml4_virt = ((uint64_t)pmm_req_pages(1)) + hhdm_offset;
+    uint64_t pml4_virt = ((uint64_t)pmm_req_page(1)) + hhdm_offset;
     ku_memset((uint8_t*)pml4_virt, 0, 4096);
     map_all((uint64_t*)pml4_virt);
     return (uint64_t*)pml4_virt;
 }
 
 uint64_t init_vmm(uint64_t pml4[]) {
-    uint64_t pml4_virt = ((uint64_t)pmm_req_pages(1)) + hhdm_offset;
+    uint64_t pml4_virt = ((uint64_t)pmm_req_page(1)) + hhdm_offset;
     ku_memset((uint8_t*)pml4_virt, 0, 4096);
     map_all((uint64_t*)pml4_virt);
     uint64_t cr3 = pml4_virt - hhdm_offset;
