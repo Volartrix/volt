@@ -110,10 +110,12 @@ void kmain(void) {
     // printf("PML4 from vmm_init(): %p", pml4);
     // printf("Free: %.16llX\n", pmm_get_free());
 
-    char* test = pmm_req_pages(1);
+    char* test = pmm_req_page();
     memset(test, 'h', 4096);
     printf("Test: %s", test);
-    pmm_free_pages(test, 1);
+    pmm_free_page(test);
 
+    pmm_stress_test();
+    
     hcf();
 }
