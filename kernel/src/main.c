@@ -96,11 +96,15 @@ void kmain(void) {
     idt_init();
 
     pmm_init();
-    uint64_t* pml4 = NULL;
-    uint64_t  cr3  = init_vmm(pml4);
 
-    KERNEL_SWITCH_PAGE_TREE(cr3);
-    KERNEL_SWITCH_STACK();
+    uint64_t cr3;
+    asm volatile("mov %%cr3, %0" : "=r"(cr3));
+
+    uint64_t pml4 = cr3;
+    vmm_init(pml4);
+
+    //KERNEL_SWITCH_PAGE_TREE(cr3);
+    //KERNEL_SWITCH_STACK();
 
     printf("Switched Page Tree and Switched the Kernel Stack!\n\n");
     printf("Kernel Start: %.16llX\n", p_kernel_start);

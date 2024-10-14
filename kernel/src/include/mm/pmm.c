@@ -33,17 +33,21 @@ void pmm_init() {
 
     printf("Initialized PMM: \n\tUsable Enties: %d\n\tHead Address: "
            "%.16llX\n",
-           usable_entries, (uint64_t)(uintptr_t)head);
+           usable_entries, (uint64_t)(uintptr_t)(head - hhdm_offset));
 }
 
 void* pmm_req_page() {
-    if (head == NULL)
+    if (head == NULL) {
+        printf("There is no free memory!");
         return NULL; // No memory is free.
+    }
 
     if (head->size == 4096) {
         void* pointer = (void*)head;
         head = head->next;
-        return pointer;
+        if (pointer == NULL)
+            printf("Ptr is null :P 1.\n");
+        return pointer - hhdm_offset;
     }
 
     // Size is greater than 4096.
@@ -52,14 +56,20 @@ void* pmm_req_page() {
     new_head->size = head->size - 4096;
     void* pointer = (void*) head;
     head = new_head;
-    return pointer;
+    if (pointer == NULL) {
+        printf("Ptr is null :P 2.\n");
+    }
+    printf("Allocation ouccoured! Memory allocated: %d, Free Memory: %d, Address: %.16llX\n", head->size, pmm_get_free(), (uint64_t)(pointer - hhdm_offset));
+    return pointer - hhdm_offset;
 }
 
 void pmm_free_page(void* ptr) {
     if (ptr == NULL)
         return;
 
-    struct fl_entry* entry = (struct fl_entry*) ptr;
+    ptr += hhdm_offset;
+
+    struct fl_entry* entry = (struct fl_entry*)ptr;
     entry->size = 4096;
     entry->next = head;
     head = entry;
