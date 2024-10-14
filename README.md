@@ -24,7 +24,8 @@ The kernel has a few important features that it needs to use to manage memory fo
 4. `make` - The build tool for the project
 5. `git` - The VCS and used to get some dependencies 
 6. `wget` - Also used to get dependencies
-7. `qemu` - The emulator for the kernel
+7. `qemu` - The emulator and virtual machine for the kernel
+8. `hashalot` - Set of tools used to hash data used by ./kernel/get-deps
 
 ### Build and Run the Kernel
 There are different option of running / emulating the kernel. Below is a list of them with all the commands
