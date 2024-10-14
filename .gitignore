@@ -5,3 +5,4 @@
 *.hdd
 bin/
 hmm.secret
+/.vscode
