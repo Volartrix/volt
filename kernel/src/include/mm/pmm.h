@@ -18,7 +18,7 @@ extern uint64_t*                      pml4_global;
 
 struct fl_entry {
     struct fl_entry* next;
-    // size_t size;
+    size_t size;
 };
 
 void     pmm_init();
