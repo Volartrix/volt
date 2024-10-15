@@ -37,6 +37,10 @@ __attribute__((
     section(".requests"))) static volatile struct limine_kernel_address_request
     kernel_addr_request = {.id = LIMINE_KERNEL_ADDRESS_REQUEST, .revision = 0};
 
+__attribute__((
+    used, section(".requests")))
+    static volatile struct limine_module_request module_request = {.id = LIMINE_MODULE_REQUEST, .revision = 0};
+
 __attribute__((used,
                section(".requests_start_"
                        "marker"))) static volatile LIMINE_REQUESTS_START_MARKER;
@@ -52,6 +56,8 @@ struct limine_memmap_response*         memmap           = NULL;
 struct limine_kernel_address_response* kernel_addr      = NULL;
 uint64_t                               kernel_phys_base = 0;
 uint64_t                               kernel_virt_base = 0;
+struct limine_module_response *modules = NULL;
+struct limine_file *ramfs_file = NULL;
 
 
 static void hcf(void) {
@@ -97,11 +103,11 @@ void kmain(void) {
 
     pmm_init();
 
-    uint64_t cr3;
-    asm volatile("mov %%cr3, %0" : "=r"(cr3));
+    //uint64_t cr3;
+    //asm volatile("mov %%cr3, %0" : "=r"(cr3));
 
-    uint64_t pml4 = cr3;
-    vmm_init(pml4);
+    //uint64_t pml4 = cr3;
+    //vmm_init(pml4);
 
     //KERNEL_SWITCH_PAGE_TREE(cr3);
     //KERNEL_SWITCH_STACK();
@@ -111,8 +117,16 @@ void kmain(void) {
     printf("Write Allowed Start: %.16llX\n", p_writeallowed_start);
     printf("Kernel End: %.16llX\n\n", p_kernel_end);
 
-    printf("PML4 from vmm_init(): %p", pml4);
-    printf("Free: %.16llX\n", pmm_get_free());
+    //printf("PML4 from vmm_init(): %p", pml4);
+    printf("Free: %d\n\n\n", pmm_get_free());
+
+    modules = module_request.response;
+    ramfs_file = modules->modules[0];
+    printf("RAM-FS: \n");
+    printf("\tAddress: %.16llX\n", (uint64_t)ramfs_file->address);
+    printf("\tPath: %s\n", ramfs_file->path);
+    printf("\tSize: %d\n", ramfs_file->size);
+    
     
     hcf();
 }

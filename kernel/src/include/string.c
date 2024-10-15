@@ -226,6 +226,67 @@ char* strtok(char* str, const char* delim) {
     return token_start;
 }
 
+size_t strtol(const char* str, char** endptr, int base) {
+    const char *ptr = str;
+    long result = 0;
+    int sign = 1;
+
+    // Skip whitespace
+    while (isspace((unsigned char)*ptr)) {
+        ptr++;
+    }
+
+    // Handle optional sign
+    if (*ptr == '-') {
+        sign = -1;
+        ptr++;
+    } else if (*ptr == '+') {
+        ptr++;
+    }
+
+    // Determine base if not specified
+    if (base == 0) {
+        if (*ptr == '0') {
+            if (*(ptr + 1) == 'x' || *(ptr + 1) == 'X') {
+                base = 16;
+                ptr += 2;
+            } else {
+                base = 8;
+                ptr++;
+            }
+        } else {
+            base = 10;
+        }
+    }
+
+    // Convert string to long
+    while (*ptr) {
+        int digit;
+
+        if (isdigit((unsigned char)*ptr)) {
+            digit = *ptr - '0';
+        } else if (isalpha((unsigned char)*ptr)) {
+            digit = tolower((unsigned char)*ptr) - 'a' + 10;
+        } else {
+            break; // Invalid character
+        }
+
+        if (digit >= base) {
+            break; // Invalid digit for base
+        }
+
+        result = result * base + digit;
+        ptr++;
+    }
+
+    // Set endptr if requested
+    if (endptr) {
+        *endptr = (char *)ptr;
+    }
+
+    return sign * result;
+}
+
 size_t strlen(const char* s) {
     const char* p = s;
     while (*p != '\0') {

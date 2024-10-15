@@ -10,6 +10,9 @@ $(call USER_VARIABLE,QEMUFLAGS,-m 2G -monitor stdio)
 
 override IMAGE_NAME := bin/volt-os-x64
 
+override RAMFS_DIR := ramfs
+override RAMFS_ARCHIVE := bin/ramfs.tar
+
 .PHONY: all
 all: $(IMAGE_NAME).iso
 
@@ -141,7 +144,7 @@ kernel: kernel-deps
 	echo "\033[38;5;94m\033[1m[MAKE]\033[0m kernel/GNUmakefile"
 	$(MAKE) -C kernel
 
-$(IMAGE_NAME).iso: limine/limine kernel bin
+$(IMAGE_NAME).iso: limine/limine kernel bin ramfs
 	echo "\033[38;5;214m\033[1m[ISO]\033[0m Creating ISO image"
 	rm -rf iso_root > /dev/null 2>&1
 	mkdir -p iso_root/boot > /dev/null 2>&1
@@ -165,7 +168,7 @@ $(IMAGE_NAME).iso: limine/limine kernel bin
 	rm -rf iso_root > /dev/null 2>&1
 	echo "\033[38;5;214m\033[1m[ISO]\033[0m Created ISO image in $(IMAGE_NAME).iso"
 
-$(IMAGE_NAME).hdd: limine/limine kernel bin
+$(IMAGE_NAME).hdd: limine/limine kernel bin ramfs
 	echo "\033[36m\033[1m[HDD]\033[0m Creating HDD image"
 	rm -f $(IMAGE_NAME).hdd > /dev/null 2>&1
 	dd if=/dev/zero bs=1M count=0 seek=64 of=$(IMAGE_NAME).hdd > /dev/null 2>&1
@@ -176,10 +179,11 @@ $(IMAGE_NAME).hdd: limine/limine kernel bin
 	echo "\033[36m\033[1m[HDD]\033[0m Installed limine BIOS"
 	mformat -i $(IMAGE_NAME).hdd@@1M > /dev/null 2>&1
 	echo "\033[36m\033[1m[HDD]\033[0m Formatting $(IMAGE_NAME).hdd"
-	mmd -i $(IMAGE_NAME).hdd@@1M ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine > /dev/null 2>&1
+	mmd -i $(IMAGE_NAME).hdd@@1M ::/EFI ::/EFI/BOOT ::/boot ::/boot/limine ::/boot/volt > /dev/null 2>&1
 	mcopy -i $(IMAGE_NAME).hdd@@1M kernel/bin-$(KARCH)/volt-kernel.elf ::/boot > /dev/null 2>&1
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine.conf ::/boot/limine > /dev/null 2>&1
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine/limine-bios.sys ::/boot/limine > /dev/null 2>&1
+	mcopy -i $(IMAGE_NAME).hdd@@1M $(RAMFS_ARCHIVE) ::/boot/volt/ > /dev/null 2>&1
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine/BOOTX64.EFI ::/EFI/BOOT > /dev/null 2>&1
 	mcopy -i $(IMAGE_NAME).hdd@@1M limine/BOOTIA32.EFI ::/EFI/BOOT > /dev/null 2>&1
 	echo "\033[36m\033[1m[HDD]\033[0m Copied files to $(IMAGE_NAME).hdd"
@@ -187,13 +191,18 @@ $(IMAGE_NAME).hdd: limine/limine kernel bin
 .PHONY: clean
 clean:
 	$(MAKE) -C kernel clean
-	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd bin > /dev/null 2>&1
+	rm -rf iso_root $(IMAGE_NAME).iso $(IMAGE_NAME).hdd bin $(RAMFS_ARCHIVE) > /dev/null 2>&1
 	echo "\033[34m\033[1m[INFO]\033[0m cleaned root"
 
 .PHONY: format
 format:
 	find . -name "*.h" -o -name "*.c" | xargs clang-format -i --style=file
 	echo "\033[34m\033[1m[INFO]\033[0m formatted code using clang format"
+
+.PHONY: ramfs
+ramfs: bin
+	tar -cf $(RAMFS_ARCHIVE) --format=ustar -C $(RAMFS_DIR) .
+	echo "\033[34m\033[1m[INFO]\033[0m generated RAMFS"
 
 .PHONY: distclean
 distclean: clean
