@@ -117,3 +117,38 @@ void pmm_stress_test() {
         printf("Freed remaining 1 page at %p\n", allocations[i]);
     }
 }
+
+void* pmm_req_pages(size_t num_pages) {
+    void* page_array = pmm_req_page(); // Allocate a single page for the array of pointers
+    if (!page_array) {
+        return NULL; // Return NULL if allocation fails
+    }
+
+    // Store the individual pages right after the array
+    void** pages = (void**)page_array;
+
+    for (size_t i = 0; i < num_pages; i++) {
+        pages[i] = pmm_req_page(); // Request each individual page
+        if (!pages[i]) {
+            // If allocation fails, free already allocated pages
+            for (size_t j = 0; j < i; j++) {
+                pmm_free_page(pages[j]);
+            }
+            pmm_free_page(page_array); // Free the array holding the pointers
+            return NULL; // Return NULL if any page request fails
+        }
+    }
+
+    return page_array; // Return the pointer to the array of pages
+}
+
+
+void pmm_free_pages(void* pages, size_t num_pages) {
+    // Assuming pages is the pointer to the array of pointers
+    void** page_ptrs = (void**)pages; // Cast to the correct pointer type
+
+    for (size_t i = 0; i < num_pages; i++) {
+        pmm_free_page(page_ptrs[i]); // Free each allocated page
+    }
+    pmm_free_page(pages); // Free the page that holds the pointers
+}

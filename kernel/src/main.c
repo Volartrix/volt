@@ -127,6 +127,5 @@ void kmain(void) {
     printf("\tPath: %s\n", ramfs_file->path);
     printf("\tSize: %d\n", ramfs_file->size);
     
-    
     hcf();
 }

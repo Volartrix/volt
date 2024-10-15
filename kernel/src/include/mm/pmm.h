@@ -26,6 +26,8 @@ void*    pmm_req_page();
 void     pmm_free_page(void* ptr);
 uint64_t pmm_get_free();
 void     pmm_stress_test();
+void*    pmm_req_pages(size_t num_pages);
+void     pmm_free_pages(void* ptr, size_t num_pages);
 
 
 #endif    // __PMM_H__
